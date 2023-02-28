@@ -1,8 +1,13 @@
 const loadPhone = async (searchText, dataLimit) => {
     const URL = `https://openapi.programming-hero.com/api/phones?search=${searchText}`
-    const res = await fetch(URL);
-    const data = await res.json();
-    displayPhone(data.data, dataLimit);
+    try {
+        const res = await fetch(URL);
+        const data = await res.json();
+        displayPhone(data.data, dataLimit);
+    }
+    catch(error){
+        console.log(error);
+    }
 }
 const displayPhone = (phones, dataLimit) => {
     const phoneContainer = document.getElementById("phone-container");
@@ -25,7 +30,7 @@ const displayPhone = (phones, dataLimit) => {
     }
     phones.forEach(phone => {
         const div = document.createElement('div');
-        const { image, phone_name } = phone
+        const { image, phone_name, slug } = phone
         // console.log(phone_name)
         div.classList.add('col');
         div.innerHTML = `
@@ -34,6 +39,9 @@ const displayPhone = (phones, dataLimit) => {
                 <div class="card-body">
                     <h5 class="card-title">${phone_name}</h5>
                     <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+                    <button onclick="loadPhoneDetails('${slug}')" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                     Details
+                    </button>
                 </div>
             </div>
         `
@@ -50,7 +58,7 @@ const processSearch = (dataLimit) => {
 document.getElementById('search-btn').addEventListener('click', function () {
     processSearch(9);
 })
-document.getElementById('search-field').addEventListener('keypress' , function(event){
+document.getElementById('search-field').addEventListener('keypress', function (event) {
     if (event.key === "Enter") {
         processSearch(9);
     }
@@ -68,4 +76,23 @@ const toggleSpinner = isLoading => {
         loaderSection.classList.add('d-none');
     }
 }
-// loadPhone('apple');
+loadPhone('apple', 10);
+const loadPhoneDetails = async (id) => {
+    const URL = `https://openapi.programming-hero.com/api/phone/${id}`
+    try {
+        const res = await fetch(URL);
+        const data = await res.json();
+        showPhoneDetails(data.data);
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+const showPhoneDetails = phone => {
+    console.log(phone);
+    document.getElementById('exampleModalLabel').innerText = phone.slug;
+    document.getElementById('modal-body').innerHTML = `
+    <p>ReleaseDate: ${phone ? phone.releaseDate : "No releaseDate"}</p>
+    <p>storage: ${phone.mainFeatures.storage}</p>
+    `
+}
